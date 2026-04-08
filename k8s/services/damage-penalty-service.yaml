@@ -1,0 +1,141 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: damage-penalty-service
+  namespace: car-rental
+  labels:
+    app: damage-penalty-service
+    tier: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: damage-penalty-service
+  template:
+    metadata:
+      labels:
+        app: damage-penalty-service
+        tier: backend
+    spec:
+      containers:
+      - name: damage-penalty-service
+        image: car-rental/damage-penalty-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        # Database Configuration
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://postgres-damage-penalty:5432/damage_penalty_db"
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DATABASE_USER
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DATABASE_PASSWORD
+        
+        # RabbitMQ Configuration
+        - name: SPRING_RABBITMQ_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: RABBITMQ_HOST
+        - name: SPRING_RABBITMQ_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: RABBITMQ_PORT
+        - name: SPRING_RABBITMQ_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: RABBITMQ_USERNAME
+        - name: SPRING_RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: RABBITMQ_PASSWORD
+        
+        # Application Configuration
+        - name: SERVER_PORT
+          value: "8080"
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SPRING_PROFILES_ACTIVE
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: damage-penalty-service
+  namespace: car-rental
+  labels:
+    app: damage-penalty-service
+spec:
+  selector:
+    app: damage-penalty-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+    name: http
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: damage-penalty-service-hpa
+  namespace: car-rental
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: damage-penalty-service
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

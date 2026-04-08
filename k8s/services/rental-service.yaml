@@ -1,0 +1,147 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rental-service
+  namespace: car-rental
+  labels:
+    app: rental-service
+    tier: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rental-service
+  template:
+    metadata:
+      labels:
+        app: rental-service
+        tier: backend
+    spec:
+      containers:
+      - name: rental-service
+        image: car-rental/rental-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+          name: http
+        env:
+        # Database Configuration
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://postgres-rental:5432/rental_db"
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DATABASE_USER
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DATABASE_PASSWORD
+        
+        # RabbitMQ Configuration
+        - name: SPRING_RABBITMQ_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: RABBITMQ_HOST
+        - name: SPRING_RABBITMQ_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: RABBITMQ_PORT
+        - name: SPRING_RABBITMQ_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: RABBITMQ_USERNAME
+        - name: SPRING_RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: RABBITMQ_PASSWORD
+        
+        # Service URLs (for inter-service communication)
+        - name: DAMAGE_PENALTY_SERVICE_URL
+          value: "http://damage-penalty-service"
+        - name: PAYMENT_SERVICE_URL
+          value: "http://payment-service"
+        
+        # Application Configuration
+        - name: SERVER_PORT
+          value: "8081"
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SPRING_PROFILES_ACTIVE
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8081
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rental-service
+  namespace: car-rental
+  labels:
+    app: rental-service
+spec:
+  selector:
+    app: rental-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8081
+    name: http
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: rental-service-hpa
+  namespace: car-rental
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: rental-service
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

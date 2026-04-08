@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: car-rental
+data:
+  # Logging
+  LOG_LEVEL: "info"
+  
+  # Timezone
+  TIME_ZONE: "Asia/Ho_Chi_Minh"
+  
+  # Currency
+  CURRENCY: "VND"
+  
+  # RabbitMQ Configuration
+  RABBITMQ_HOST: "rabbitmq-service"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_MANAGEMENT_PORT: "15672"
+  RABBITMQ_USERNAME: "guest"
+  
+  # Redis Configuration
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  
+  # Database Configuration
+  DATABASE_PORT: "5432"
+  DATABASE_USER: "postgres"
+  
+  # Application Settings
+  SPRING_PROFILES_ACTIVE: "prod"

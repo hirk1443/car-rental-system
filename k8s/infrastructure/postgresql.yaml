@@ -1,0 +1,296 @@
+---
+# PostgreSQL Service for Damage-Penalty
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-damage-penalty
+  namespace: car-rental
+  labels:
+    app: postgres-damage-penalty
+spec:
+  ports:
+  - port: 5432
+    name: postgres
+  clusterIP: None
+  selector:
+    app: postgres-damage-penalty
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-damage-penalty
+  namespace: car-rental
+  labels:
+    app: postgres-damage-penalty
+spec:
+  serviceName: postgres-damage-penalty
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-damage-penalty
+  template:
+    metadata:
+      labels:
+        app: postgres-damage-penalty
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          value: "damage_penalty_db"
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DATABASE_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DATABASE_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+---
+# PostgreSQL Service for Rental
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-rental
+  namespace: car-rental
+  labels:
+    app: postgres-rental
+spec:
+  ports:
+  - port: 5432
+    name: postgres
+  clusterIP: None
+  selector:
+    app: postgres-rental
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-rental
+  namespace: car-rental
+  labels:
+    app: postgres-rental
+spec:
+  serviceName: postgres-rental
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-rental
+  template:
+    metadata:
+      labels:
+        app: postgres-rental
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          value: "rental_db"
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DATABASE_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DATABASE_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+---
+# PostgreSQL Service for Payment
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-payment
+  namespace: car-rental
+  labels:
+    app: postgres-payment
+spec:
+  ports:
+  - port: 5432
+    name: postgres
+  clusterIP: None
+  selector:
+    app: postgres-payment
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-payment
+  namespace: car-rental
+  labels:
+    app: postgres-payment
+spec:
+  serviceName: postgres-payment
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-payment
+  template:
+    metadata:
+      labels:
+        app: postgres-payment
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          value: "payment_db"
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DATABASE_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DATABASE_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+---
+# PostgreSQL Service for Statistics
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-statistics
+  namespace: car-rental
+  labels:
+    app: postgres-statistics
+spec:
+  ports:
+  - port: 5432
+    name: postgres
+  clusterIP: None
+  selector:
+    app: postgres-statistics
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-statistics
+  namespace: car-rental
+  labels:
+    app: postgres-statistics
+spec:
+  serviceName: postgres-statistics
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-statistics
+  template:
+    metadata:
+      labels:
+        app: postgres-statistics
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          value: "statistics_db"
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DATABASE_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DATABASE_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi

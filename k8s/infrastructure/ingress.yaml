@@ -1,0 +1,76 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: car-rental-ingress
+  namespace: car-rental
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: api.car-rental.local
+    http:
+      paths:
+      # Damage-Penalty Service
+      - path: /api/damage-penalty(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: damage-penalty-service
+            port:
+              number: 80
+      
+      # Rental Service
+      - path: /api/rentals(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: rental-service
+            port:
+              number: 80
+      
+      # Payment Service
+      - path: /api/payments(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: payment-service
+            port:
+              number: 80
+      
+      # Statistics Service
+      - path: /api/statistics(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: statistics-service
+            port:
+              number: 80
+---
+# Optional: Ingress for RabbitMQ Management UI
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rabbitmq-management-ingress
+  namespace: car-rental
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: rabbitmq.car-rental.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rabbitmq-service
+            port:
+              number: 15672
