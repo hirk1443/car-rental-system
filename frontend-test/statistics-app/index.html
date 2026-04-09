@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Statistics - Thống kê doanh thu</title>
+    <link rel="stylesheet" href="../rental-app/style.css">
+    <style>
+        header h1 { color: #805ad5; }
+        .tab.active { background: #805ad5; }
+        .rental-item { border-left-color: #805ad5; }
+        .rental-header strong { color: #805ad5; }
+        .card h2 { color: #805ad5; }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .chart-container {
+            margin: 20px 0;
+        }
+        .bar {
+            background: #805ad5;
+            height: 30px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Revenue Statistics</h1>
+            <p>Hệ thống thống kê doanh thu</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('yearly')">📅 Năm</button>
+            <button class="tab" onclick="showTab('quarterly')">📆 Quý</button>
+            <button class="tab" onclick="showTab('monthly')">📋 Tháng</button>
+        </div>
+
+        <!-- YEARLY TAB -->
+        <div id="yearly-tab" class="tab-content active">
+            <div class="card">
+                <h2>📅 Thống kê theo năm</h2>
+                <div class="form-group">
+                    <label>Chọn năm:</label>
+                    <input type="number" id="yearInput" value="2024" min="2020" max="2030">
+                    <button onclick="loadYearlyReport()" class="btn btn-primary">Xem báo cáo</button>
+                </div>
+                <div id="yearly-result"></div>
+            </div>
+        </div>
+
+        <!-- QUARTERLY TAB -->
+        <div id="quarterly-tab" class="tab-content">
+            <div class="card">
+                <h2>📆 Thống kê theo quý</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Năm:</label>
+                        <input type="number" id="quarterYear" value="2024" min="2020" max="2030">
+                    </div>
+                    <div class="form-group">
+                        <label>Quý:</label>
+                        <select id="quarter">
+                            <option value="1">Quý 1 (T1-T3)</option>
+                            <option value="2">Quý 2 (T4-T6)</option>
+                            <option value="3">Quý 3 (T7-T9)</option>
+                            <option value="4">Quý 4 (T10-T12)</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="loadQuarterlyReport()" class="btn btn-primary">Xem báo cáo</button>
+                <button onclick="loadAllQuarters()" class="btn btn-info">Xem cả năm</button>
+                <div id="quarterly-result"></div>
+            </div>
+        </div>
+
+        <!-- MONTHLY TAB -->
+        <div id="monthly-tab" class="tab-content">
+            <div class="card">
+                <h2>📋 Thống kê theo tháng</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Năm:</label>
+                        <input type="number" id="monthYear" value="2024" min="2020" max="2030">
+                    </div>
+                    <div class="form-group">
+                        <label>Tháng:</label>
+                        <select id="month">
+                            <option value="1">Tháng 1</option>
+                            <option value="2">Tháng 2</option>
+                            <option value="3">Tháng 3</option>
+                            <option value="4">Tháng 4</option>
+                            <option value="5">Tháng 5</option>
+                            <option value="6">Tháng 6</option>
+                            <option value="7">Tháng 7</option>
+                            <option value="8">Tháng 8</option>
+                            <option value="9">Tháng 9</option>
+                            <option value="10">Tháng 10</option>
+                            <option value="11">Tháng 11</option>
+                            <option value="12">Tháng 12</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="loadMonthlyReport()" class="btn btn-primary">Xem báo cáo</button>
+                <button onclick="loadAllMonths()" class="btn btn-info">Xem cả năm</button>
+                <div id="monthly-result"></div>
+            </div>
+        </div>
+
+        <!-- REFRESH BUTTON -->
+        <div class="card" style="margin-top: 20px; text-align: center;">
+            <button onclick="refreshStatistics()" class="btn btn-success" style="font-size: 1.2em; padding: 15px 40px;">
+                🔄 Làm mới thống kê
+            </button>
+            <p style="margin-top: 10px; color: #666;">
+                (Gọi service để cập nhật lại dữ liệu thống kê từ Payment Service)
+            </p>
+        </div>
+
+        <!-- RESPONSE DISPLAY -->
+        <div id="response" class="response"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

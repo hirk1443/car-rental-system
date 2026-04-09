@@ -8,7 +8,7 @@ metadata:
     app: statistics-service
     tier: backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: statistics-service
@@ -98,22 +98,20 @@ spec:
             cpu: "1000m"
         
         livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
+          tcpSocket:
             port: 8083
-          initialDelaySeconds: 60
+          initialDelaySeconds: 120
           periodSeconds: 10
           timeoutSeconds: 5
-          failureThreshold: 3
+          failureThreshold: 5
         
         readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
+          tcpSocket:
             port: 8083
-          initialDelaySeconds: 30
+          initialDelaySeconds: 90
           periodSeconds: 5
           timeoutSeconds: 3
-          failureThreshold: 3
+          failureThreshold: 5
 ---
 apiVersion: v1
 kind: Service
@@ -131,29 +129,3 @@ spec:
     targetPort: 8083
     name: http
   type: ClusterIP
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: statistics-service-hpa
-  namespace: car-rental
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: statistics-service
-  minReplicas: 2
-  maxReplicas: 6
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80

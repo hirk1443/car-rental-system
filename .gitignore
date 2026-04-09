@@ -1,0 +1,54 @@
+# -----------------------------
+# OS files
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# IDE/editor files
+# -----------------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# -----------------------------
+# Java/Maven build output
+# -----------------------------
+**/target/
+**/build/
+*.class
+
+# Maven/Java runtime files
+.mvn/timing.properties
+hs_err_pid*
+replay_pid*
+
+# Test and coverage outputs
+**/surefire-reports/
+**/failsafe-reports/
+**/jacoco.exec
+
+# -----------------------------
+# Logs and temp files
+# -----------------------------
+logs/
+*.log
+*.tmp
+*.temp
+*.swp
+
+# -----------------------------
+# Environment/local secrets
+# -----------------------------
+.env
+.env.*
+!.env.example
+
+# -----------------------------
+# Frontend artifacts
+# -----------------------------
+**/node_modules/
+**/dist/
+**/.cache/

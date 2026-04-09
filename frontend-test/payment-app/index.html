@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💳 Payment Management - Quản lý thanh toán</title>
+    <link rel="stylesheet" href="../rental-app/style.css">
+    <style>
+        header h1 { color: #48bb78; }
+        .tab.active { background: #48bb78; }
+        .rental-item { border-left-color: #48bb78; }
+        .rental-header strong { color: #48bb78; }
+        .card h2 { color: #48bb78; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💳 Payment Management System</h1>
+            <p>Hệ thống quản lý thanh toán</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('create')">➕ Tạo thanh toán</button>
+            <button class="tab" onclick="showTab('list')">📋 Danh sách</button>
+            <button class="tab" onclick="showTab('process')">⚙️ Xử lý</button>
+        </div>
+
+        <!-- CREATE PAYMENT -->
+        <div id="create-tab" class="tab-content active">
+            <div class="card">
+                <h2>➕ Tạo thanh toán mới</h2>
+                <form id="create-form">
+                    <div class="form-group">
+                        <label>Rental ID:</label>
+                        <input type="text" id="rentalId" placeholder="e.g., RNT-..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Customer ID:</label>
+                        <input type="text" id="customerId" value="CUST-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Loại thanh toán:</label>
+                        <select id="paymentType" required>
+                            <option value="RENTAL">RENTAL - Tiền thuê</option>
+                            <option value="DEPOSIT">DEPOSIT - Đặt cọc</option>
+                            <option value="PENALTY">PENALTY - Phạt</option>
+                            <option value="ADDITIONAL">ADDITIONAL - Phí thêm</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Số tiền (VND):</label>
+                        <input type="number" id="amount" value="500000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phương thức:</label>
+                        <select id="method" required>
+                            <option value="CASH">CASH - Tiền mặt</option>
+                            <option value="CREDIT_CARD">CREDIT_CARD - Thẻ tín dụng</option>
+                            <option value="DEBIT_CARD">DEBIT_CARD - Thẻ ghi nợ</option>
+                            <option value="BANK_TRANSFER">BANK_TRANSFER - Chuyển khoản</option>
+                            <option value="E_WALLET">E_WALLET - Ví điện tử</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả:</label>
+                        <textarea id="description" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Tạo thanh toán</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- LIST PAYMENTS -->
+        <div id="list-tab" class="tab-content">
+            <div class="card">
+                <h2>📋 Danh sách thanh toán</h2>
+                <div class="filter-bar">
+                    <select id="statusFilter">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="PENDING">PENDING - Chờ xử lý</option>
+                        <option value="PROCESSING">PROCESSING - Đang xử lý</option>
+                        <option value="COMPLETED">COMPLETED - Hoàn tất</option>
+                        <option value="FAILED">FAILED - Thất bại</option>
+                        <option value="REFUNDED">REFUNDED - Đã hoàn tiền</option>
+                    </select>
+                    <input type="text" id="rentalIdFilter" placeholder="Rental ID">
+                    <button onclick="loadPayments()" class="btn btn-success">🔄 Tải lại</button>
+                </div>
+                <div id="payments-list"></div>
+            </div>
+        </div>
+
+        <!-- PROCESS PAYMENT -->
+        <div id="process-tab" class="tab-content">
+            <div class="card">
+                <h2>⚙️ Xử lý thanh toán</h2>
+                
+                <h3>✅ Xử lý thanh toán</h3>
+                <form id="process-form">
+                    <div class="form-group">
+                        <label>Payment ID:</label>
+                        <input type="text" id="processPaymentId" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Transaction ID:</label>
+                        <input type="text" id="transactionId" value="TXN-12345" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Reference:</label>
+                        <input type="text" id="reference" value="REF-001">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Xử lý thanh toán</button>
+                </form>
+
+                <h3>💸 Hoàn tiền</h3>
+                <form id="refund-form">
+                    <div class="form-group">
+                        <label>Payment ID (để hoàn tiền):</label>
+                        <input type="text" id="refundPaymentId" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Số tiền hoàn (VND):</label>
+                        <input type="number" id="refundAmount" value="100000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Lý do:</label>
+                        <textarea id="refundReason" rows="2">Khách hủy đơn</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning">Tạo hoàn tiền</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- RESPONSE DISPLAY -->
+        <div id="response" class="response"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

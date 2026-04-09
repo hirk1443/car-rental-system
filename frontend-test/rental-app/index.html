@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Rental Management - Quản lý thuê xe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 Rental Management System</h1>
+            <p>Hệ thống quản lý thuê xe</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('create')">➕ Tạo đơn thuê</button>
+            <button class="tab" onclick="showTab('list')">📋 Danh sách</button>
+            <button class="tab" onclick="showTab('actions')">⚙️ Thao tác</button>
+        </div>
+
+        <!-- CREATE RENTAL TAB -->
+        <div id="create-tab" class="tab-content active">
+            <div class="card">
+                <h2>➕ Tạo đơn thuê mới</h2>
+                <form id="create-form">
+                    <div class="form-group">
+                        <label>Customer ID:</label>
+                        <input type="text" id="customerId" value="CUST-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Vehicle ID:</label>
+                        <input type="text" id="vehicleId" value="VEH-001" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ngày bắt đầu:</label>
+                            <input type="date" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Ngày kết thúc:</label>
+                            <input type="date" id="endDate" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Số tiền thuê (VND):</label>
+                        <input type="number" id="rentalAmount" value="500000" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Điểm nhận xe:</label>
+                            <input type="text" id="pickupLocation" value="Ho Chi Minh City" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Điểm trả xe:</label>
+                            <input type="text" id="returnLocation" value="Ho Chi Minh City" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Đặt cọc (VND):</label>
+                        <input type="number" id="depositAmount" value="200000" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Tạo đơn thuê</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- LIST RENTALS TAB -->
+        <div id="list-tab" class="tab-content">
+            <div class="card">
+                <h2>📋 Danh sách đơn thuê</h2>
+                <div class="filter-bar">
+                    <select id="statusFilter">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="PENDING">PENDING - Chờ xác nhận</option>
+                        <option value="CONFIRMED">CONFIRMED - Đã xác nhận</option>
+                        <option value="ACTIVE">ACTIVE - Đang thuê</option>
+                        <option value="RETURNED">RETURNED - Đã trả xe</option>
+                        <option value="COMPLETED">COMPLETED - Hoàn tất</option>
+                        <option value="CANCELLED">CANCELLED - Đã hủy</option>
+                    </select>
+                    <button onclick="loadRentals()" class="btn">🔄 Tải lại</button>
+                </div>
+                <div id="rentals-list"></div>
+            </div>
+        </div>
+
+        <!-- ACTIONS TAB -->
+        <div id="actions-tab" class="tab-content">
+            <div class="card">
+                <h2>⚙️ Thao tác với đơn thuê</h2>
+                <div class="form-group">
+                    <label>Rental ID:</label>
+                    <input type="text" id="actionRentalId" placeholder="Nhập Rental ID">
+                </div>
+                
+                <div class="actions-grid">
+                    <button onclick="performAction('confirm')" class="btn btn-success">✅ Xác nhận</button>
+                    <button onclick="performAction('pickup')" class="btn btn-info">🚗 Lấy xe</button>
+                    <button onclick="performAction('return')" class="btn btn-warning">🔙 Trả xe</button>
+                    <button onclick="performAction('complete')" class="btn btn-primary">✔️ Hoàn tất</button>
+                    <button onclick="performAction('cancel')" class="btn btn-danger">❌ Hủy</button>
+                    <button onclick="getRentalHistory()" class="btn">📜 Lịch sử</button>
+                </div>
+
+                <h3>Kiểm tra sau khi trả xe</h3>
+                <form id="inspection-form">
+                    <div class="form-group">
+                        <label>Rental ID:</label>
+                        <input type="text" id="inspectionRentalId" required>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="hasDamage">
+                            Có hư hại
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Ghi chú:</label>
+                        <textarea id="inspectionNotes" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Hoàn tất kiểm tra</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- RESPONSE DISPLAY -->
+        <div id="response" class="response"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

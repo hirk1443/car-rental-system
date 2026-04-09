@@ -1,5 +1,6 @@
 package com.carrental.rental.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -77,6 +78,7 @@ public class Rental {
     private LocalDateTime updatedAt;
     
     @Transient
+    @JsonIgnore
     private RentalState currentState;
     
     @PrePersist
