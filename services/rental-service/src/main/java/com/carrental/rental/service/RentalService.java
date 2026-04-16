@@ -152,8 +152,25 @@ public class RentalService {
     public Rental updatePenaltyAmount(String rentalId, BigDecimal penaltyAmount) {
         log.info("Updating penalty amount for rental {}: {}", rentalId, penaltyAmount);
         Rental rental = getRentalById(rentalId);
+        RentalStatus oldStatus = rental.getStatus();
         rental.setPenaltyAmount(penaltyAmount);
-        return rentalRepository.save(rental);
+
+        if (penaltyAmount != null
+                && penaltyAmount.compareTo(BigDecimal.ZERO) > 0
+                && rental.getStatus() == RentalStatus.INSPECTION) {
+            rental.setStatus(RentalStatus.PENALTY_DUE);
+        }
+
+        Rental saved = rentalRepository.save(rental);
+        if (oldStatus != saved.getStatus()) {
+            saveStateHistory(
+                    rentalId,
+                    oldStatus,
+                    saved.getStatus(),
+                    "Auto transition after penalty update");
+        }
+
+        return saved;
     }
     
     @Transactional(readOnly = true)

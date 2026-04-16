@@ -43,8 +43,8 @@ echo ✅ ConfigMap and Secrets applied
 echo.
 
 REM Step 3: Deploy Infrastructure
-echo 🏗️  Step 3: Deploying Infrastructure (PostgreSQL, RabbitMQ, Redis)...
-kubectl apply -f infrastructure\postgresql.yaml
+echo 🏗️  Step 3: Deploying Infrastructure (MySQL, RabbitMQ, Redis)...
+kubectl apply -f infrastructure\mysql.yaml
 kubectl apply -f infrastructure\rabbitmq.yaml
 kubectl apply -f infrastructure\redis.yaml
 echo ✅ Infrastructure deployed
@@ -54,10 +54,7 @@ REM Wait for infrastructure to be ready
 echo ⏳ Waiting for infrastructure to be ready...
 echo    This may take 2-3 minutes...
 
-kubectl wait --for=condition=ready pod -l app=postgres-damage-penalty -n car-rental --timeout=300s
-kubectl wait --for=condition=ready pod -l app=postgres-rental -n car-rental --timeout=300s
-kubectl wait --for=condition=ready pod -l app=postgres-payment -n car-rental --timeout=300s
-kubectl wait --for=condition=ready pod -l app=postgres-statistics -n car-rental --timeout=300s
+kubectl wait --for=condition=ready pod -l app=mysql -n car-rental --timeout=300s
 kubectl wait --for=condition=ready pod -l app=rabbitmq -n car-rental --timeout=300s
 kubectl wait --for=condition=ready pod -l app=redis -n car-rental --timeout=300s
 

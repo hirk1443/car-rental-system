@@ -42,19 +42,23 @@ public class Invoice {
     @Column(name = "deposit_amount", precision = 15, scale = 2)
     private BigDecimal depositAmount;
     
+    @Builder.Default
     @Column(name = "penalty_amount", precision = 15, scale = 2)
     private BigDecimal penaltyAmount = BigDecimal.ZERO;
     
     @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal totalAmount;
     
+    @Builder.Default
     @Column(name = "paid_amount", precision = 15, scale = 2)
     private BigDecimal paidAmount = BigDecimal.ZERO;
     
+    @Builder.Default
     @Column(name = "refund_amount", precision = 15, scale = 2)
     private BigDecimal refundAmount = BigDecimal.ZERO;
     
-    @Column(name = "is_paid")
+    @Builder.Default
+    @Column(name = "is_paid", nullable = false)
     private Boolean isPaid = false;
     
     @Column(name = "paid_at")
@@ -73,6 +77,18 @@ public class Invoice {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (isPaid == null) {
+            isPaid = false;
+        }
+        if (paidAmount == null) {
+            paidAmount = BigDecimal.ZERO;
+        }
+        if (refundAmount == null) {
+            refundAmount = BigDecimal.ZERO;
+        }
+        if (penaltyAmount == null) {
+            penaltyAmount = BigDecimal.ZERO;
+        }
         generateInvoiceNumber();
         calculateTotal();
     }

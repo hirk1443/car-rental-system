@@ -26,7 +26,7 @@ mvn test -Dtest=YourTestClass#methodName
 - statistics-service: 8083
 
 **Required Infrastructure:**
-- PostgreSQL (port 5432) with databases: `damage_penalty_db`, `rental_db`, `payment_db`, `statistics_db`
+- MySQL (port 3306) with databases: `damage_penalty_db`, `rental_db`, `payment_db`, `statistics_db`
 - RabbitMQ (port 5672)
 - Redis (port 6379) - only for statistics-service
 
@@ -109,7 +109,7 @@ Cache is evicted by the scheduled job running at 2 AM daily.
 ## Tech Stack
 
 - Java 17, Spring Boot 3.2.0
-- PostgreSQL 15 (database-per-service pattern)
+- MySQL 8 (database-per-service pattern)
 - RabbitMQ (event bus)
 - Redis (caching)
 - Lombok (boilerplate reduction)

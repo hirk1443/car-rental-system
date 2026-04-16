@@ -230,14 +230,19 @@ header p {
     color: #2f855a;
 }
 
-.status-active {
+.status-in_progress {
     background: #bee3f8;
     color: #2c5282;
 }
 
-.status-returned {
+.status-inspection {
     background: #e9d8fd;
     color: #6b46c1;
+}
+
+.status-penalty_due {
+    background: #fed7d7;
+    color: #c53030;
 }
 
 .status-completed {
@@ -248,6 +253,26 @@ header p {
 .status-cancelled {
     background: #fed7d7;
     color: #c53030;
+}
+
+.status-unpaid {
+    background: #fff5f5;
+    color: #c53030;
+}
+
+.status-partially_paid {
+    background: #feebc8;
+    color: #c05621;
+}
+
+.status-paid {
+    background: #c6f6d5;
+    color: #276749;
+}
+
+.status-waived {
+    background: #e9d8fd;
+    color: #6b46c1;
 }
 
 .rental-details p {

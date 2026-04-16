@@ -5,6 +5,7 @@ import com.carrental.damagepenalty.event.DamageEventPublisher;
 import com.carrental.damagepenalty.exception.DamageNotFoundException;
 import com.carrental.damagepenalty.model.*;
 import com.carrental.damagepenalty.repository.DamageRepository;
+import com.carrental.damagepenalty.util.IdNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,9 +31,9 @@ public class DamageService {
                  dto.getVehicleId(), dto.getRentalId());
         
         DamageReport damage = DamageReport.builder()
-            .vehicleId(dto.getVehicleId())
-            .rentalId(dto.getRentalId())
-            .customerId(dto.getCustomerId())
+            .vehicleId(IdNormalizer.toUuid(dto.getVehicleId(), "vehicleId"))
+            .rentalId(IdNormalizer.toUuid(dto.getRentalId(), "rentalId"))
+            .customerId(IdNormalizer.toUuid(dto.getCustomerId(), "customerId"))
             .damageType(dto.getDamageType())
             .severity(dto.getSeverity())
             .description(dto.getDescription())

@@ -24,8 +24,8 @@ data:
   REDIS_PORT: "6379"
   
   # Database Configuration
-  DATABASE_PORT: "5432"
-  DATABASE_USER: "postgres"
+  DATABASE_PORT: "3306"
+  DATABASE_USER: "root"
   
   # Application Settings
   SPRING_PROFILES_ACTIVE: "prod"

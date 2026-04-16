@@ -15,7 +15,7 @@ k8s/
 │   └── secrets.yaml                       # Passwords và secrets
 │
 ├── infrastructure/
-│   ├── postgresql.yaml                    # 4 PostgreSQL StatefulSets
+│   ├── mysql.yaml                         # 1 MySQL StatefulSet (4 databases)
 │   ├── rabbitmq.yaml                      # RabbitMQ StatefulSet
 │   ├── redis.yaml                         # Redis Deployment
 │   └── ingress.yaml                       # Ingress Controller config
@@ -116,10 +116,7 @@ Truy cập:
 
 | Component | Replicas | Storage |
 |-----------|----------|---------|
-| PostgreSQL (damage_penalty) | 1 | 5Gi |
-| PostgreSQL (rental) | 1 | 5Gi |
-| PostgreSQL (payment) | 1 | 5Gi |
-| PostgreSQL (statistics) | 1 | 5Gi |
+| MySQL (shared, 4 DBs) | 1 | 10Gi |
 | RabbitMQ | 1 | 3Gi |
 
 ### Services
@@ -130,7 +127,7 @@ Truy cập:
 | rental-service | ClusterIP | 80 | 8081 |
 | payment-service | ClusterIP | 80 | 8082 |
 | statistics-service | ClusterIP | 80 | 8083 |
-| postgres-* | ClusterIP (Headless) | 5432 | 5432 |
+| mysql-service | ClusterIP | 3306 | 3306 |
 | rabbitmq-service | ClusterIP | 5672, 15672 | 5672, 15672 |
 | redis-service | ClusterIP | 6379 | 6379 |
 
@@ -148,7 +145,7 @@ Truy cập:
 ### Secrets
 
 Được định nghĩa trong `config/secrets.yaml`:
-- `DATABASE_PASSWORD`: Mật khẩu PostgreSQL
+- `DATABASE_PASSWORD`: Mật khẩu MySQL
 - `RABBITMQ_PASSWORD`: Mật khẩu RabbitMQ
 - `JWT_SECRET`: Secret key cho JWT
 - `PAYMENT_GATEWAY_API_KEY`: API key cho payment gateway
@@ -170,22 +167,22 @@ Horizontal Pod Autoscaler (HPA) được cấu hình cho tất cả services:
 
 ```bash
 # Damage-Penalty DB
-kubectl exec -it postgres-damage-penalty-0 -n car-rental -- psql -U postgres -d damage_penalty_db
+kubectl exec -it mysql-0 -n car-rental -- mysql -uroot -pmysql123 -e "USE damage_penalty_db; SHOW TABLES;"
 
 # Rental DB
-kubectl exec -it postgres-rental-0 -n car-rental -- psql -U postgres -d rental_db
+kubectl exec -it mysql-0 -n car-rental -- mysql -uroot -pmysql123 -e "USE rental_db; SHOW TABLES;"
 
 # Payment DB
-kubectl exec -it postgres-payment-0 -n car-rental -- psql -U postgres -d payment_db
+kubectl exec -it mysql-0 -n car-rental -- mysql -uroot -pmysql123 -e "USE payment_db; SHOW TABLES;"
 
 # Statistics DB
-kubectl exec -it postgres-statistics-0 -n car-rental -- psql -U postgres -d statistics_db
+kubectl exec -it mysql-0 -n car-rental -- mysql -uroot -pmysql123 -e "USE statistics_db; SHOW TABLES;"
 ```
 
 ### Backup:
 
 ```bash
-kubectl exec postgres-damage-penalty-0 -n car-rental -- pg_dump -U postgres damage_penalty_db > backup.sql
+kubectl exec mysql-0 -n car-rental -- mysqldump -uroot -pmysql123 damage_penalty_db > backup.sql
 ```
 
 ## 🐰 RabbitMQ Management
@@ -304,8 +301,8 @@ kubectl exec -it <pod-name> -n car-rental -- nslookup damage-penalty-service
 ### Database connection issues:
 
 ```bash
-# Test PostgreSQL connection
-kubectl exec -it <app-pod> -n car-rental -- nc -zv postgres-damage-penalty 5432
+# Test MySQL connection
+kubectl exec -it <app-pod> -n car-rental -- nc -zv mysql-service 3306
 ```
 
 ## 📚 Additional Resources
@@ -313,7 +310,7 @@ kubectl exec -it <app-pod> -n car-rental -- nc -zv postgres-damage-penalty 5432
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
 - [Spring Boot on Kubernetes](https://spring.io/guides/gs/spring-boot-kubernetes/)
 - [RabbitMQ on Kubernetes](https://www.rabbitmq.com/kubernetes/operator/operator-overview.html)
-- [PostgreSQL on Kubernetes](https://www.postgresql.org/docs/current/high-availability.html)
+- [MySQL Documentation](https://dev.mysql.com/doc/)
 
 ## ✅ Checklist
 

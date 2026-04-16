@@ -12,11 +12,11 @@ Hệ thống quản lý cho thuê xe ô tô với kiến trúc Microservices - *
 
 ```bash
 # 1. Setup databases
-psql -U postgres
-CREATE DATABASE damage_penalty_db;
-CREATE DATABASE rental_db;
-CREATE DATABASE payment_db;
-CREATE DATABASE statistics_db;
+mysql -u root -p
+CREATE DATABASE IF NOT EXISTS damage_penalty_db;
+CREATE DATABASE IF NOT EXISTS rental_db;
+CREATE DATABASE IF NOT EXISTS payment_db;
+CREATE DATABASE IF NOT EXISTS statistics_db;
 
 # 2. Start dependencies
 # - RabbitMQ (port 5672)
@@ -99,17 +99,16 @@ cd services/statistics-service && mvn spring-boot:run      # Port 8083
                     │
     ┌───────────────┼───────────────┐
     │               │               │
-┌───▼─────┐   ┌────▼──────┐   ┌───▼─────┐
-│PostgreSQL│   │PostgreSQL │   │ Redis   │
-│damage_db│   │rental_db  │   │ Cache   │
-└─────────┘   │payment_db │   └─────────┘
-              │stats_db   │
-              └───────────┘
+┌───────────────┐   ┌───▼─────┐
+│ MySQL         │   │ Redis   │
+│ 4 databases   │   │ Cache   │
+│ (db-per-svc)  │   └─────────┘
+└───────────────┘
 ```
 
 ### Tech Stack
 - **Backend:** Java 17, Spring Boot 3.2.0
-- **Database:** PostgreSQL 15 (4 databases)
+- **Database:** MySQL 8 (4 databases)
 - **Message Broker:** RabbitMQ
 - **Cache:** Redis (Statistics Service)
 - **ORM:** Spring Data JPA + Hibernate
@@ -276,7 +275,7 @@ Statistics Updated (auto)
 ### Prerequisites
 - Java 17+
 - Maven 3.8+
-- PostgreSQL 15+
+- MySQL 8+
 - RabbitMQ
 - Redis
 
@@ -323,7 +322,7 @@ curl http://localhost:8083/api/statistics/revenue/yearly/2024
 | Rental | 8081 | rental_db | - |
 | Payment | 8082 | payment_db | - |
 | Statistics | 8083 | statistics_db | Redis:6379 |
-| PostgreSQL | - | 5432 | - |
+| MySQL | - | 3306 | - |
 | RabbitMQ | - | 5672 | UI:15672 |
 
 ---
@@ -370,7 +369,7 @@ src/main/java/com/carrental/{service}/
 - **Total Files:** 95 Java files
 - **Total Lines of Code:** ~12,000 LOC
 - **Services:** 4 microservices
-- **Databases:** 4 PostgreSQL databases
+- **Databases:** 4 MySQL databases
 - **REST Endpoints:** 40+ APIs
 - **RabbitMQ Events:** 15+ event types
 - **Documentation:** 11 markdown files (~40,000 words)

@@ -1,67 +1,45 @@
-# 🚀 QUICK START - Frontend Testing Apps
+# QUICKSTART - Two Modules E2E
 
-## Cách nhanh nhất để test!
-
-### 📦 Nếu services đang chạy trên Kubernetes:
+## 1) Start services
 
 ```bash
-# Bước 1: Setup port-forward
-cd frontend-test
-setup-k8s-portforward.bat
-
-# Bước 2: Mở tất cả apps
-open-all-apps.bat
+cd services/rental-service && mvn spring-boot:run
+cd services/damage-penalty-service && mvn spring-boot:run
+cd services/payment-service && mvn spring-boot:run
 ```
 
-Xong! Giờ bạn có 4 tabs trong browser để test.
-
----
-
-### 💻 Nếu chạy services trực tiếp (Development):
+## 2) Open apps
 
 ```bash
-# Terminal 1
-cd services/rental-service
-mvn spring-boot:run
-
-# Terminal 2
-cd services/damage-penalty-service
-mvn spring-boot:run
-
-# Terminal 3
-cd services/payment-service
-mvn spring-boot:run
-
-# Terminal 4
-cd services/statistics-service
-mvn spring-boot:run
-
-# Terminal 5
-cd frontend-test
-open-all-apps.bat
+start frontend-test/rental-app/index.html
+start frontend-test/damage-app/index.html
+start frontend-test/payment-app/index.html
 ```
 
----
+## 3) E2E flow
 
-## 🎯 Test Flow đơn giản:
+1. **Rental app**
+   - Tạo rental
+   - confirm -> pickup -> return -> inspection(hasDamage=true)
+2. **Damage app**
+   - Tạo damage report (chọn rental, auto-fill vehicle/customer)
+   - Hậu kiểm: `REPORTED -> UNDER_REVIEW -> REPAIRED -> CLOSED`
+3. **Damage app / Penalty tab**
+   - Kiểm tra penalty auto-create
+   - Pay penalty (có thể trả nhiều lần)
+4. **Payment app**
+   - Tạo payment (`DEPOSIT`/`RENTAL_FEE`/`PENALTY`)
+   - Process payment
+   - (Optional) refund payment
+5. **Payment app / Invoice tab**
+   - Tạo invoice
+   - cập nhật penalty / mark paid / add refund
+6. **Rental app**
+   - Reload list để xem penaltyAmount
+   - complete rental
 
-1. **Rental App** → Tạo đơn thuê → Copy Rental ID
-2. **Rental App** → Xác nhận → Lấy xe → Trả xe → Kiểm tra (tick "có hư hại")
-3. **Damage App** → Báo hư hại → Copy Damage ID
-4. **Damage App** → Duyệt (APPROVED) → Tính phạt tự động
-5. **Payment App** → Tạo thanh toán → Xử lý
-6. **Rental App** → Hoàn tất đơn
-7. **Statistics App** → Làm mới → Xem báo cáo
+## 4) Endpoints used
 
----
-
-## ✅ Checklist
-
-- [ ] Services đang chạy (check localhost:8080-8083)
-- [ ] PostgreSQL, RabbitMQ, Redis hoạt động
-- [ ] Port-forward đã setup (nếu dùng K8s)
-- [ ] Đã mở các frontend apps
-
----
-
-Xem chi tiết trong `README.md` 📖
+- Rental: `http://localhost:8081/api/rentals`
+- Damage/Penalty: `http://localhost:8080/api/damage-reports`, `http://localhost:8080/api/penalties`
+- Payment/Invoice: `http://localhost:8082/api/payments`, `http://localhost:8082/api/invoices`

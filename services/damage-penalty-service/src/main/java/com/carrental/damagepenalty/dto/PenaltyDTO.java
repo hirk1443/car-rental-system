@@ -1,6 +1,7 @@
 package com.carrental.damagepenalty.dto;
 
 import com.carrental.damagepenalty.model.PenaltyType;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -18,21 +18,24 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PenaltyDTO {
     
-    private UUID damageId;
+    private String damageId;
     
     @NotNull(message = "Rental ID is required")
-    private UUID rentalId;
+    @NotBlank(message = "Rental ID is required")
+    private String rentalId;
     
     @NotNull(message = "Customer ID is required")
-    private UUID customerId;
+    @NotBlank(message = "Customer ID is required")
+    private String customerId;
     
     @NotNull(message = "Vehicle ID is required")
-    private UUID vehicleId;
+    @NotBlank(message = "Vehicle ID is required")
+    private String vehicleId;
     
     @NotNull(message = "Penalty type is required")
     private PenaltyType penaltyType;
     
-    @NotNull(message = "Description is required")
+    @NotBlank(message = "Description is required")
     private String description;
     
     @NotNull(message = "Penalty amount is required")

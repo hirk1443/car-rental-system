@@ -23,7 +23,7 @@
         <div class="tabs">
             <button class="tab active" onclick="showTab('create')">➕ Báo hư hại</button>
             <button class="tab" onclick="showTab('list')">📋 Danh sách</button>
-            <button class="tab" onclick="showTab('penalty')">💰 Tính phạt</button>
+            <button class="tab" onclick="showTab('penalty')">🔎 Hậu kiểm</button>
         </div>
 
         <!-- CREATE DAMAGE REPORT -->
@@ -32,21 +32,31 @@
                 <h2>➕ Tạo báo cáo hư hại mới</h2>
                 <form id="create-form">
                     <div class="form-group">
-                        <label>Rental ID:</label>
-                        <input type="text" id="rentalId" placeholder="e.g., RNT-..." required>
+                        <label>Rental:</label>
+                        <div class="filter-bar">
+                            <select id="rentalSelect" required>
+                                <option value="">-- Chọn rental đang INSPECTION/PENALTY_DUE --</option>
+                            </select>
+                            <button type="button" onclick="loadRentalsForCreate()" class="btn btn-danger">🔄</button>
+                        </div>
                     </div>
+                    <p id="selectedRentalStatus" class="penalty">Trạng thái hiện tại: (chưa chọn rental)</p>
                     <div class="form-group">
                         <label>Vehicle ID:</label>
-                        <input type="text" id="vehicleId" placeholder="e.g., VEH-001" required>
+                        <input type="text" id="vehicleId" placeholder="Tự động theo rental" required readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Customer ID:</label>
+                        <input type="text" id="customerId" placeholder="Tự động theo rental" required readonly>
                     </div>
                     <div class="form-group">
                         <label>Loại hư hại:</label>
                         <select id="damageType" required>
                             <option value="SCRATCH">SCRATCH - Trầy xước</option>
                             <option value="DENT">DENT - Móp méo</option>
-                            <option value="BROKEN">BROKEN - Vỡ, gãy</option>
+                            <option value="BROKEN_PART">BROKEN_PART - Vỡ/gãy bộ phận</option>
+                            <option value="INTERIOR_DAMAGE">INTERIOR_DAMAGE - Hư hại nội thất</option>
                             <option value="MECHANICAL">MECHANICAL - Hỏng cơ</option>
-                            <option value="OTHER">OTHER - Khác</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -54,7 +64,8 @@
                         <select id="severity" required>
                             <option value="MINOR">MINOR - Nhẹ</option>
                             <option value="MODERATE">MODERATE - Vừa</option>
-                            <option value="SEVERE">SEVERE - Nghiêm trọng</option>
+                            <option value="MAJOR">MAJOR - Nghiêm trọng</option>
+                            <option value="TOTAL_LOSS">TOTAL_LOSS - Tổn thất lớn</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -62,8 +73,16 @@
                         <textarea id="description" rows="4" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Ước tính chi phí sửa chữa (VND):</label>
-                        <input type="number" id="estimatedCost" value="500000">
+                        <label>Vị trí hư hại trên xe:</label>
+                        <input type="text" id="locationOnVehicle" placeholder="Ví dụ: cửa trước bên phải">
+                    </div>
+                    <div class="form-group">
+                        <label>Người ghi nhận:</label>
+                        <input type="text" id="reportedBy" placeholder="Nhân viên kiểm định">
+                    </div>
+                    <div class="form-group">
+                        <label>Hình ảnh (mỗi dòng một URL):</label>
+                        <textarea id="imageUrls" rows="3" placeholder="https://.../image1.jpg&#10;https://.../image2.jpg"></textarea>
                     </div>
                     <button type="submit" class="btn btn-danger">Tạo báo cáo</button>
                 </form>
@@ -79,9 +98,8 @@
                         <option value="">Tất cả trạng thái</option>
                         <option value="REPORTED">REPORTED - Đã báo cáo</option>
                         <option value="UNDER_REVIEW">UNDER_REVIEW - Đang xem xét</option>
-                        <option value="APPROVED">APPROVED - Đã duyệt</option>
-                        <option value="REJECTED">REJECTED - Từ chối</option>
                         <option value="REPAIRED">REPAIRED - Đã sửa</option>
+                        <option value="CLOSED">CLOSED - Đã đóng</option>
                     </select>
                     <button onclick="loadDamages()" class="btn btn-danger">🔄 Tải lại</button>
                 </div>
@@ -89,22 +107,26 @@
             </div>
         </div>
 
-        <!-- PENALTY CALCULATOR -->
+        <!-- INSPECTION REVIEW -->
         <div id="penalty-tab" class="tab-content">
             <div class="card">
-                <h2>💰 Tính toán và áp dụng phạt</h2>
+                <h2>🔎 Hậu kiểm hư hại (damage.updated)</h2>
                 <form id="penalty-form">
                     <div class="form-group">
                         <label>Damage Report ID:</label>
-                        <input type="text" id="damageId" placeholder="UUID của damage report" required>
+                        <div class="filter-bar">
+                            <select id="damageIdSelect" required>
+                                <option value="">-- Chọn damage report --</option>
+                            </select>
+                            <button type="button" onclick="loadDamages()" class="btn btn-danger">🔄</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Trạng thái mới:</label>
                         <select id="newStatus" required>
-                            <option value="APPROVED">APPROVED - Duyệt & tính phạt</option>
-                            <option value="REJECTED">REJECTED - Từ chối</option>
-                            <option value="UNDER_REVIEW">UNDER_REVIEW - Xem xét lại</option>
+                            <option value="UNDER_REVIEW">UNDER_REVIEW - Đang xem xét</option>
                             <option value="REPAIRED">REPAIRED - Đã sửa xong</option>
+                            <option value="CLOSED">CLOSED - Đóng báo cáo</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -115,12 +137,11 @@
                 </form>
 
                 <div style="margin-top: 30px; padding: 20px; background: #fff5f5; border-radius: 10px;">
-                    <h3 style="color: #c53030;">ℹ️ Lưu ý về tính phạt</h3>
+                    <h3 style="color: #c53030;">ℹ️ Lưu ý xử lý hư hại</h3>
                     <ul style="margin-left: 20px; margin-top: 10px; color: #666;">
-                        <li>Khi status = APPROVED: Hệ thống tự động gửi event tính phạt</li>
-                        <li>Penalty Service sẽ nhận event và tạo penalty record</li>
-                        <li>Phạt được cộng vào Rental qua RabbitMQ</li>
-                        <li>Kiểm tra kết quả trong Payment Service</li>
+                        <li>Penalty được auto-create khi tạo report với severity MODERATE/MAJOR</li>
+                        <li>Form này dùng để cập nhật trạng thái và chi phí sửa chữa thực tế</li>
+                        <li>Thanh toán penalty thực hiện ở Payment App</li>
                     </ul>
                 </div>
             </div>

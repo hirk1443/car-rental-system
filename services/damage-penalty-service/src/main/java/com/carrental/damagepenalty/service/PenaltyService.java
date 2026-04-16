@@ -6,6 +6,7 @@ import com.carrental.damagepenalty.event.PenaltyEventPublisher;
 import com.carrental.damagepenalty.exception.PenaltyNotFoundException;
 import com.carrental.damagepenalty.model.*;
 import com.carrental.damagepenalty.repository.PenaltyRepository;
+import com.carrental.damagepenalty.util.IdNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,10 +31,10 @@ public class PenaltyService {
                  dto.getRentalId(), dto.getPenaltyType());
         
         Penalty penalty = Penalty.builder()
-            .damageId(dto.getDamageId())
-            .rentalId(dto.getRentalId())
-            .customerId(dto.getCustomerId())
-            .vehicleId(dto.getVehicleId())
+            .damageId(dto.getDamageId() != null ? IdNormalizer.toUuid(dto.getDamageId(), "damageId") : null)
+            .rentalId(IdNormalizer.toUuid(dto.getRentalId(), "rentalId"))
+            .customerId(IdNormalizer.toUuid(dto.getCustomerId(), "customerId"))
+            .vehicleId(IdNormalizer.toUuid(dto.getVehicleId(), "vehicleId"))
             .penaltyType(dto.getPenaltyType())
             .description(dto.getDescription())
             .penaltyAmount(dto.getPenaltyAmount())
@@ -52,10 +53,10 @@ public class PenaltyService {
     @Transactional
     public Penalty createPenaltyForDamage(DamageReport damage) {
         PenaltyDTO dto = PenaltyDTO.builder()
-            .damageId(damage.getDamageId())
-            .rentalId(damage.getRentalId())
-            .customerId(damage.getCustomerId())
-            .vehicleId(damage.getVehicleId())
+            .damageId(damage.getDamageId() != null ? damage.getDamageId().toString() : null)
+            .rentalId(damage.getRentalId().toString())
+            .customerId(damage.getCustomerId().toString())
+            .vehicleId(damage.getVehicleId().toString())
             .penaltyType(PenaltyType.DAMAGE)
             .description("Repair cost for " + damage.getDamageType())
             .penaltyAmount(damage.getRepairCost())

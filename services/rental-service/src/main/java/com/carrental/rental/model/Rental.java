@@ -62,6 +62,7 @@ public class Rental {
     @Column(name = "inspection_notes", columnDefinition = "TEXT")
     private String inspectionNotes;
     
+    @Builder.Default
     @Column(name = "has_damage")
     private Boolean hasDamage = false;
     
@@ -88,12 +89,24 @@ public class Rental {
         if (status == null) {
             status = RentalStatus.PENDING;
         }
+        if (hasDamage == null) {
+            hasDamage = false;
+        }
+        if (penaltyAmount == null) {
+            penaltyAmount = BigDecimal.ZERO;
+        }
         calculateTotalCost();
     }
     
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+        if (hasDamage == null) {
+            hasDamage = false;
+        }
+        if (penaltyAmount == null) {
+            penaltyAmount = BigDecimal.ZERO;
+        }
     }
     
     @PostLoad

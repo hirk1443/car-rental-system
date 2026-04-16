@@ -60,9 +60,10 @@ mvn clean install
 CREATE DATABASE damage_penalty_db;
 ```
 
-### 3. Start Infrastructure (PostgreSQL, RabbitMQ)
+### 3. Start Infrastructure (MySQL, RabbitMQ)
 ```bash
-docker run -d --name postgres-damage -e POSTGRES_DB=damage_penalty_db -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15-alpine
+docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=mysql -p 3306:3306 mysql:8.4
+docker exec -it mysql mysql -uroot -pmysql -e "CREATE DATABASE IF NOT EXISTS damage_penalty_db;"
 docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management-alpine
 ```
 

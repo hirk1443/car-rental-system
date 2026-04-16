@@ -28,7 +28,7 @@ spec:
         env:
         # Database Configuration
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:postgresql://postgres-payment:5432/payment_db"
+          value: "jdbc:mysql://mysql-service:3306/payment_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh"
         - name: SPRING_DATASOURCE_USERNAME
           valueFrom:
             configMapKeyRef:

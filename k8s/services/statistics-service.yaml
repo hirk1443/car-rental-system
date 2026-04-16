@@ -28,7 +28,7 @@ spec:
         env:
         # Database Configuration
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:postgresql://postgres-statistics:5432/statistics_db"
+          value: "jdbc:mysql://mysql-service:3306/statistics_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh"
         - name: SPRING_DATASOURCE_USERNAME
           valueFrom:
             configMapKeyRef:

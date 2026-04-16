@@ -43,11 +43,10 @@
                      │
      ┌───────────────┼───────────────┬────────────────┐
      │               │               │                │
-┌────▼────────┐ ┌───▼────────┐ ┌────▼──────┐ ┌──────▼──────┐
-│PostgreSQL   │ │PostgreSQL  │ │PostgreSQL │ │PostgreSQL   │
-│damage_db    │ │rental_db   │ │payment_db │ │statistics_db│
-│(StatefulSet)│ │(StatefulSet│ │(StatefulSe│ │(StatefulSet)│
-└─────────────┘ └────────────┘ └───────────┘ └─────────────┘
+┌───────────────────────────────────────────┐
+│       MySQL (1 StatefulSet, 4 DBs)       │
+│ damage_penalty | rental | payment | stats│
+└───────────────────────────────────────────┘
 ```
 
 ---
@@ -95,16 +94,13 @@ kubectl apply -f namespace.yaml
 # 2. Apply ConfigMap and Secrets
 kubectl apply -f config/
 
-# 3. Deploy Infrastructure (PostgreSQL, RabbitMQ, Redis)
-kubectl apply -f infrastructure/postgresql.yaml
+# 3. Deploy Infrastructure (MySQL, RabbitMQ, Redis)
+kubectl apply -f infrastructure/mysql.yaml
 kubectl apply -f infrastructure/rabbitmq.yaml
 kubectl apply -f infrastructure/redis.yaml
 
 # Wait for databases to be ready (takes 1-2 minutes)
-kubectl wait --for=condition=ready pod -l app=postgres-damage-penalty -n car-rental --timeout=300s
-kubectl wait --for=condition=ready pod -l app=postgres-rental -n car-rental --timeout=300s
-kubectl wait --for=condition=ready pod -l app=postgres-payment -n car-rental --timeout=300s
-kubectl wait --for=condition=ready pod -l app=postgres-statistics -n car-rental --timeout=300s
+kubectl wait --for=condition=ready pod -l app=mysql -n car-rental --timeout=300s
 kubectl wait --for=condition=ready pod -l app=rabbitmq -n car-rental --timeout=300s
 kubectl wait --for=condition=ready pod -l app=redis -n car-rental --timeout=300s
 
@@ -136,10 +132,7 @@ kubectl get pods -n car-rental
 # payment-service-zzz                       1/1     Running   0          2m
 # statistics-service-xxx                    1/1     Running   0          2m
 # statistics-service-yyy                    1/1     Running   0          2m
-# postgres-damage-penalty-0                 1/1     Running   0          5m
-# postgres-rental-0                         1/1     Running   0          5m
-# postgres-payment-0                        1/1     Running   0          5m
-# postgres-statistics-0                     1/1     Running   0          5m
+# mysql-0                                   1/1     Running   0          5m
 # rabbitmq-0                                1/1     Running   0          5m
 # redis-xxx                                 1/1     Running   0          5m
 
@@ -239,30 +232,30 @@ kubectl rollout status deployment/damage-penalty-service -n car-rental
 
 ## 🗄️ Database Management
 
-### Access PostgreSQL
+### Access MySQL
 
 ```bash
 # Access damage-penalty database
-kubectl exec -it postgres-damage-penalty-0 -n car-rental -- psql -U postgres -d damage_penalty_db
+kubectl exec -it mysql-0 -n car-rental -- mysql -uroot -pmysql123 -e "USE damage_penalty_db; SHOW TABLES;"
 
 # Access rental database
-kubectl exec -it postgres-rental-0 -n car-rental -- psql -U postgres -d rental_db
+kubectl exec -it mysql-0 -n car-rental -- mysql -uroot -pmysql123 -e "USE rental_db; SHOW TABLES;"
 
 # Access payment database
-kubectl exec -it postgres-payment-0 -n car-rental -- psql -U postgres -d payment_db
+kubectl exec -it mysql-0 -n car-rental -- mysql -uroot -pmysql123 -e "USE payment_db; SHOW TABLES;"
 
 # Access statistics database
-kubectl exec -it postgres-statistics-0 -n car-rental -- psql -U postgres -d statistics_db
+kubectl exec -it mysql-0 -n car-rental -- mysql -uroot -pmysql123 -e "USE statistics_db; SHOW TABLES;"
 ```
 
 ### Backup Database
 
 ```bash
 # Backup damage_penalty_db
-kubectl exec postgres-damage-penalty-0 -n car-rental -- pg_dump -U postgres damage_penalty_db > damage_backup.sql
+kubectl exec mysql-0 -n car-rental -- mysqldump -uroot -pmysql123 damage_penalty_db > damage_backup.sql
 
 # Restore
-kubectl exec -i postgres-damage-penalty-0 -n car-rental -- psql -U postgres damage_penalty_db < damage_backup.sql
+kubectl exec -i mysql-0 -n car-rental -- mysql -uroot -pmysql123 damage_penalty_db < damage_backup.sql
 ```
 
 ---
@@ -295,11 +288,11 @@ kubectl exec -it <pod-name> -n car-rental -- nslookup damage-penalty-service
 ### Database Connection Issues
 
 ```bash
-# Check if PostgreSQL pods are running
-kubectl get pods -l app=postgres-damage-penalty -n car-rental
+# Check if MySQL pod is running
+kubectl get pods -l app=mysql -n car-rental
 
 # Test database connection from app pod
-kubectl exec -it <app-pod-name> -n car-rental -- nc -zv postgres-damage-penalty 5432
+kubectl exec -it <app-pod-name> -n car-rental -- nc -zv mysql-service 3306
 ```
 
 ### RabbitMQ Issues
@@ -343,7 +336,7 @@ k8s/
 │   ├── configmap.yaml                     # Application configuration
 │   └── secrets.yaml                       # Sensitive data (passwords, keys)
 ├── infrastructure/
-│   ├── postgresql.yaml                    # 4 PostgreSQL StatefulSets
+│   ├── mysql.yaml                         # 1 MySQL StatefulSet (4 databases)
 │   ├── rabbitmq.yaml                      # RabbitMQ StatefulSet
 │   ├── redis.yaml                         # Redis Deployment
 │   └── ingress.yaml                       # Ingress rules
@@ -371,7 +364,7 @@ k8s/
 - Don't commit secrets to git
 
 ### 4. High Availability
-- Run multiple replicas of databases (PostgreSQL with replication)
+- Run multiple replicas of databases (MySQL with replication)
 - Use managed database services in production
 - Configure pod anti-affinity for better distribution
 
